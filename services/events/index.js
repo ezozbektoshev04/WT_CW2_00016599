@@ -28,6 +28,23 @@ const event_service = {
 
     return new_event;
   },
+  update(id, updateData) {
+    const eventIndex = events.findIndex((e) => e.id == id);
+
+    if (eventIndex === -1) {
+      return null;
+    }
+
+    events[eventIndex].event = {
+      ...events[eventIndex].event,
+      ...updateData,
+    };
+
+    writeToFile(events);
+
+    return events[eventIndex];
+  },
+
   delete(id) {
     const index = events.findIndex((e) => e.id == id);
     events.splice(index, 1);

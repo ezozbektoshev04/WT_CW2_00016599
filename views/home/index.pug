@@ -1,15 +1,19 @@
 include ../head.pug
 body
-    .container.mt-5
-      h1 Events List
+   .container.mt-5
+      .row.d-flex.align-items-center
+        .col-md-6
+          h1 Event List
+        .col-md-6.text-end
+          a.btn.btn-success(href='/add', role='button') Add      
       table.table.table-responsive.table-hover.table-striped.table-dark
         thead
           tr
             th(scope="col") ID
             th(scope="col") Event Name
             th(scope="col") Event DateTime
+            th(scope="col") Venue
             th(scope="col") Description
-            th(scope="col") Seat
             th(scope="col") Actions
         tbody
 script.
@@ -28,7 +32,7 @@ script.
                 <td>${event.venue}</td>
                 <td>${event.description}</td>
                 <td>
-                  <button class="btn btn-primary btn-sm">Edit</button>
+                  <button class="btn btn-primary btn-sm" data-id="${e.id}" onclick="window.location.href='/update/${e.id}'">Edit</button>
                   <button class="btn btn-danger btn-sm" data-id="${e.id}">Delete</button>
                 </td>
               `;

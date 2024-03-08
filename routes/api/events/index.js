@@ -2,6 +2,7 @@ const express = require("express");
 const { validationResult } = require("express-validator");
 const { addEventValidation } = require("../../../validators/event");
 const { deleteEventValidation } = require("../../../validators/event");
+const { updateEventValidation } = require("../../../validators/event");
 
 const router = express.Router();
 const event_controller = require("../../../controllers/api/events");
@@ -16,8 +17,15 @@ router.post("/", addEventValidation(), (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
   event_controller.create(req, res);
+});
+
+router.put("/:id", updateEventValidation(), (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  event_controller.update(req, res);
 });
 
 router.delete("/:id", deleteEventValidation(), (req, res, next) => {
