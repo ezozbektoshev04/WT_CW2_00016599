@@ -1,1 +1,41 @@
-p hello world
+include ../head.pug
+body
+    .container.mt-5
+      h1 List
+      table.table.table-responsive.table-hover.table-striped.table-dark
+        thead
+          tr
+            th(scope="col") ID
+            th(scope="col") Event Name
+            th(scope="col") Event DateTime
+            th(scope="col") Venue
+            th(scope="col") Description
+            th(scope="col") Actions
+        tbody
+script.
+      document.addEventListener('DOMContentLoaded', function() {
+        axios.get('/api/events')
+          .then(function(response) {
+            const events = response.data;
+            const tableBody = document.querySelector('table tbody');
+            events.forEach(e => {
+              const row = document.createElement('tr');
+              const event = e.event
+              row.innerHTML = `
+                <td>${e.id}</td>
+                <td>${event.eventName}</td>
+                <td>${event.eventDateTime}</td>
+                <td>${event.venue}</td>
+                <td>${event.description}</td>
+                <td>
+                  <button class="btn btn-primary btn-sm">Edit</button>
+                  <button class="btn btn-danger btn-sm">Delete</button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+      });
