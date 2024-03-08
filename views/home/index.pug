@@ -1,15 +1,15 @@
 include ../head.pug
 body
     .container.mt-5
-      h1 List
+      h1 Events List
       table.table.table-responsive.table-hover.table-striped.table-dark
         thead
           tr
             th(scope="col") ID
             th(scope="col") Event Name
             th(scope="col") Event DateTime
-            th(scope="col") Venue
             th(scope="col") Description
+            th(scope="col") Seat
             th(scope="col") Actions
         tbody
 script.
@@ -29,7 +29,7 @@ script.
                 <td>${event.description}</td>
                 <td>
                   <button class="btn btn-primary btn-sm">Edit</button>
-                  <button class="btn btn-danger btn-sm">Delete</button>
+                  <button class="btn btn-danger btn-sm" data-id="${e.id}">Delete</button>
                 </td>
               `;
               tableBody.appendChild(row);
@@ -38,4 +38,19 @@ script.
           .catch(function(error) {
             console.log(error);
           });
+
+          // Use event delegation for delete buttons
+          document.addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('btn-danger')) {
+              const eventId = event.target.getAttribute('data-id');
+              axios.delete(`/api/events/${eventId}`).then(function(response) {
+                console.log('Delete successful', response);
+                location.href = '/'
+              })
+              .catch(function(error) {
+                console.log('Error deleting event', error);
+              });
+            }
+          });
       });
+
