@@ -7,16 +7,21 @@ const body_parser = require("body-parser");
 // for File IO
 const path = require("path");
 
+// for web routing
+const web_route = require("./routes/web");
+
 // make mock database (raw .json file) available globally in app
 global.mock_db = path.join(__dirname, "./data/mock_db.json");
 
 const app = express();
 
-app.get("/", function (req, res) {
-  return res.json({
-    message: "hello world",
-  });
-});
+// Set the view engine for web routes
+app.set("view engine", "pug");
 
-const port = 3000;
+app.use("/css", express.static("public/css"));
+app.use("/js", express.static("public/js"));
+
+app.use("/", web_route); // web routes
+
+const port = 4000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
