@@ -2,67 +2,111 @@ include ../head.pug
 body
   .container.mt-5
     h1 #{mode}
-    .mb-3
+    .mb-4
       label(for="eventName" class="form-label") Event Name
       input(type="text" class="form-control" id="eventName" name="eventName" required)
-    .mb-3
+      p(id="eventNameValidation" class="text-danger") 
+    .mb-4
       label(for="eventDateTime" class="form-label") Event Date/Time
-      .input-group.date(id="datetimepicker1" data-target-input="nearest")
-        input(type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1" id="eventDateTime" name="eventDateTime" required)
+      .input-group.date(id="datetime" data-target-input="nearest")
+        input(type="text" class="form-control datetimepicker-input" data-target="#datetime" id="eventDateTime" name="eventDateTime" required)
         .input-group-append(data-target="#datetimepicker1" data-toggle="datetimepicker")
           .input-group-text
             i.fas.fa-calendar-alt
-    .mb-3
-      label(for="venue" class="form-label") Venue
-      input(type="text" class="form-control" id="venue" name="venue" required)
-    .mb-3
-      label(for="description" class="form-label") Description
+      p(id="eventDateTimeValidation" class="text-danger")
+
+    .mb-4
+      label(for="location" class="form-label") Event Location
+      input(type="text" class="form-control" id="location" name="location" required)
+      p(id="eventLocationValidation" class="text-danger")
+
+    .mb-4
+      label(for="description" class="form-label") Event Description
       input(type="text" class="form-control" id="description" name="description" required)
-    button(type="submit" class="btn btn-success" onclick="submitForm()") #{mode === 'Update' ? 'Update' : 'Add'}
+      p(id="eventDescriptionValidation" class="text-danger")
+
+    button(type="submit" class="btn-outline-success btn" onclick="submittingForm()") #{mode === 'Update' ? 'Update' : 'Add'}
     span &nbsp;
-    button(type="submit" class="btn btn-primary" onclick="window.location.href='/'") Back to list
+    button(type="submit" class="btn-outline-primary btn" onclick="window.location.href='/'") Cancel
 
   script.
     const format = 'DD/MM/YYYY HH:mm'
-    const picker = new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'),{
+    const dateTime = new tempusDominus.TempusDominus(document.querySelector('#datetime'),{
         localization: {
             'locale': 'fr'
         }
     })
-    picker.dates.formatInput = function(date) {
+    dateTime.dates.formatInput = function(date) {
         return moment(date).format(format)
     }
 
     if ("#{mode}" === "Update") {
       const eventData = !{JSON.stringify(eventData || {})}.event;
-      document.getElementById('eventName').value = eventData.eventName || '';
+      document.querySelector('#eventName').value = eventData.eventName || '';
 
-      picker.dates.setValue(
+      dateTime.dates.setValue(
         new tempusDominus.DateTime(moment(eventData.eventDateTime, format))
       );
 
-      document.getElementById('venue').value = eventData.venue || '';
-      document.getElementById('description').value = eventData.description || '';
+      document.querySelector('#location').value = eventData.location || '';
+      document.querySelector('#description').value = eventData.description || '';
     }
 
-    function submitForm() {
+    function submittingForm() {
       const eventData = {
-        eventName: document.getElementById('eventName').value,
-        eventDateTime: document.getElementById('eventDateTime').value,
-        venue: document.getElementById('venue').value,
-        description: document.getElementById('description').value,
+        eventName: document.querySelector('#eventName').value,
+        eventDateTime: document.querySelector('#eventDateTime').value,
+        location: document.querySelector('#location').value,
+        description: document.querySelector('#description').value,
       };
+       document.getElementById(`eventDescriptionValidation`).textContent = "";
+        document.getElementById(`eventLocationValidation`).textContent = "";
+        document.getElementById(`eventDateTimeValidation`).textContent = "";
+        document.getElementById(`eventNameValidation`).textContent = "";
 
       const url = "#{mode}" === "Update" ? `/api/events/${!{JSON.stringify(eventData || {})}.id}` : '/api/events';
-      const method = "#{mode}" === "Update" ? 'put' : 'post';
+      const mode = "#{mode}" === "Update" ? 'put' : 'post';
 
-      axios[method](url, eventData).then(response => {
+      axios[mode](url, eventData).then(response => {
         alert('Success!');
         location.href = '/'
       })
       .catch(error => {
-        if(error.response)
-          alert(JSON.stringify(error.response.data.errors))
+        if(error.response){
+          const errors = error.response.data.errors;
+            Object.keys(errors).forEach(field => {
+              const errorMessage = errors[field];
+              
+              if (errorMessage.path == "eventName") {
+                if (errorMessage.msg != "") {
+                  document.getElementById(`eventNameValidation`).textContent = errorMessage.msg;
+                } else {
+                  document.getElementById(`eventNameValidation`).textContent = "";
+                }
+              } else if(errorMessage.path == "eventDateTime") {
+                if (errorMessage.msg != "") {
+                  document.getElementById(`eventDateTimeValidation`).textContent = errorMessage.msg;
+                } else {
+                  document.getElementById(`eventDateTimeValidation`).textContent = "";
+                }
+                
+              } else if (errorMessage.path == "location"){
+                if (errorMessage.msg != "") {
+                  document.getElementById(`eventLocationValidation`).textContent = errorMessage.msg;
+                } else {
+                  document.getElementById(`eventLocationValidation`).textContent = "";
+                }
+                 
+              } else if (errorMessage.path == "description") {
+                if (errorMessage.msg == "") {
+                  console.log("sfv")
+                  document.getElementById(`eventDescriptionValidation`).textContent = "";
+                } else {
+                  document.getElementById(`eventDescriptionValidation`).textContent = errorMessage.msg;
+                }
+              }         
+            }); 
+        }
         else
           alert(error)
       });
